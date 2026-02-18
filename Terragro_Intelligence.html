@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Terragro"/>
+<meta name="theme-color" content="#0d1f17"/>
+<title>Terragro Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0d1f17;--bg2:#122619;--bg3:#1a3a28;
+  --surface:#1e3d2c;--surface2:#243f30;
+  --border:#2d5a3d;--border2:#3a7a52;
+  --green:#52b788;--green2:#74c69d;--green3:#b7e4c7;
+  --text:#d8f3dc;--text2:#95d5b2;--text3:#74c69d;
+  --muted:#4a7c5f;--red:#e06c6c;--orange:#d4a843;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+}
+html{height:100%;overflow-x:hidden}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Outfit',sans-serif;
+  min-height:100%;min-height:100dvh;
+  overflow-x:hidden;
+}
+
+/* ── HEADER ── */
+.app-header{
+  background:linear-gradient(135deg,var(--bg2),var(--bg3));
+  border-bottom:1px solid var(--border);
+  padding:calc(12px + var(--safe-top)) 16px 12px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{font-size:22px}
+.logo-title{font-family:'DM Serif Display',serif;font-size:18px;color:var(--green3);line-height:1.1}
+.logo-title span{color:var(--green)}
+.logo-sub{font-size:9px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.8px;text-transform:uppercase;margin-top:1px}
+.btn-new-header{
+  background:linear-gradient(135deg,var(--green),#40916c);
+  color:#0d1f17;border:none;border-radius:8px;
+  padding:9px 14px;font-size:13px;font-weight:700;
+  font-family:'Outfit',sans-serif;cursor:pointer;
+  white-space:nowrap;min-height:40px;
+}
+
+/* ── MAIN ── */
+.app-main{padding:16px;padding-bottom:calc(24px + var(--safe-bot))}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+  z-index:9999;padding:12px 20px;border-radius:10px;
+  font-size:14px;font-weight:600;white-space:nowrap;
+  box-shadow:0 4px 20px rgba(0,0,0,.5);
+  animation:toastIn .3s ease;
+}
+.toast.success{background:var(--green);color:#0d1f17}
+.toast.error{background:var(--red);color:#fff}
+@keyframes toastIn{from{transform:translateX(-50%) translateY(20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;text-align:center}
+.stat-number{font-family:'DM Serif Display',serif;font-size:28px;color:var(--green2);line-height:1}
+.stat-label{font-size:10px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.6px;font-family:'DM Mono',monospace}
+
+/* ── FILTER BAR ── */
+.filter-bar{display:flex;gap:8px;flex-direction:column;margin-bottom:14px}
+.filter-input,.filter-select{
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--text);border-radius:8px;padding:10px 12px;
+  font-size:16px;font-family:'Outfit',sans-serif;outline:none;
+  min-height:48px;width:100%;
+}
+.filter-input:focus,.filter-select:focus{border-color:var(--green)}
+.filter-select{
+  cursor:pointer;
+  -webkit-appearance:none;-moz-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2374c69d' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-color:var(--surface);background-repeat:no-repeat;background-position:right 14px center;
+  padding-right:36px;
+}
+.filter-select option{background:var(--bg2);color:var(--text)}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap}
+.filter-row .filter-select{flex:1;min-width:140px}
+.btn-clear-filter{
+  background:transparent;border:1px solid var(--border2);color:var(--text3);
+  border-radius:8px;padding:10px 14px;font-size:12px;cursor:pointer;
+  font-family:'Outfit',sans-serif;min-height:44px;white-space:nowrap;
+}
+
+/* ── CARDS MÓVIL ── */
+.campos-list{display:flex;flex-direction:column;gap:10px}
+.campo-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:14px 16px;
+  position:relative;transition:border-color .2s;
+}
+.campo-card:active{border-color:var(--border2);background:var(--surface2)}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:8px}
+.card-title{font-weight:700;color:var(--green3);font-size:15px;line-height:1.2}
+.card-rol{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px}
+.card-badges{display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0}
+.card-body{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;font-size:12px}
+.card-field{display:flex;flex-direction:column;gap:1px}
+.card-field-label{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.4px}
+.card-field-value{color:var(--text2);font-size:13px}
+.card-actions{display:flex;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+.btn-card{
+  flex:1;background:var(--bg3);border:1px solid var(--border);
+  color:var(--text2);border-radius:8px;padding:9px;
+  font-size:13px;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;gap:6px;min-height:40px;font-family:'Outfit',sans-serif;
+}
+.btn-card.edit{color:var(--green2);border-color:var(--border2)}
+.btn-card.del{color:var(--red)}
+.btn-card.map-link{text-decoration:none;color:var(--text2)}
+.incomplete-badge{display:inline-flex;align-items:center;gap:3px;background:rgba(212,168,67,.12);border:1px solid rgba(212,168,67,.35);color:var(--orange);border-radius:4px;padding:2px 7px;font-size:10px;font-family:'DM Mono',monospace;font-weight:600;}
+.plant-badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;font-family:'DM Mono',monospace}
+.plant-badge.si{background:rgba(82,183,136,.15);color:var(--green);border:1px solid rgba(82,183,136,.3)}
+.plant-badge.no{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--border)}
+.region-tag{display:inline-block;padding:2px 7px;border-radius:4px;background:var(--bg3);border:1px solid var(--border);font-size:10px;color:var(--text2)}
+
+/* ── TABLA DESKTOP ── */
+.table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border);display:none}
+.campos-table{width:100%;border-collapse:collapse;font-size:13px}
+.campos-table thead th{background:var(--surface);color:var(--text2);padding:12px 14px;text-align:left;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;border-bottom:1px solid var(--border);}
+.campos-table tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+.campos-table tbody tr:last-child{border-bottom:none}
+.campos-table tbody tr:hover{background:var(--surface2)}
+.campos-table td{padding:11px 14px;vertical-align:middle}
+.campo-name{font-weight:600;color:var(--green3)}
+.campo-rol{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px}
+.sub-text{font-size:11px;color:var(--muted);margin-top:2px;font-family:'DM Mono',monospace}
+.date-badge{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)}
+.num-cell{font-family:'DM Mono',monospace;text-align:right;color:var(--green2)}
+.action-btns{display:flex;gap:6px}
+.btn-action{background:transparent;border:1px solid var(--border);border-radius:6px;padding:5px 9px;cursor:pointer;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;min-height:34px;min-width:34px;}
+.btn-action:hover{background:var(--surface2);border-color:var(--border2)}
+.btn-action.del:hover{border-color:var(--red)}
+
+/* ── EMPTY ── */
+.empty-state{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty-icon{font-size:44px;margin-bottom:14px}
+.empty-state p{margin-bottom:18px;font-size:15px;line-height:1.6}
+.btn-new{background:var(--green);color:#0d1f17;border:none;border-radius:10px;padding:14px 28px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;min-height:50px}
+
+/* ── MAPA ── */
+.map-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px}
+.map-title{font-family:'DM Serif Display',serif;font-size:15px;color:var(--green3);margin-bottom:2px}
+.map-subtitle{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:10px}
+.map-container-mobile{width:100%;max-width:220px;margin:0 auto;display:block}
+.map-legend{font-size:10px;color:var(--muted);margin-top:10px;font-family:'DM Mono',monospace;display:flex;gap:16px;flex-wrap:wrap}
+.legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:middle}
+.legend-dot.active{background:var(--green)}
+.legend-dot.total{background:var(--green);opacity:.4}
+
+/* ── FAB (botón flotante móvil) ── */
+.fab{
+  display:none;
+  position:fixed;bottom:calc(24px + var(--safe-bot));right:20px;z-index:90;
+  width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(135deg,var(--green),#40916c);
+  color:#0d1f17;border:none;font-size:26px;
+  box-shadow:0 4px 20px rgba(82,183,136,.45);
+  cursor:pointer;align-items:center;justify-content:center;
+}
+
+/* ═══════ MODAL ═══════ */
+.form-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,.82);
+  display:flex;align-items:flex-end;justify-content:center;
+  padding:0;
+}
+/* Mobile: slide from bottom (sheet) */
+.form-modal{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:20px 20px 0 0;
+  width:100%;max-width:100%;
+  max-height:92dvh;
+  display:flex;flex-direction:column;
+  box-shadow:0 -8px 40px rgba(0,0,0,.6);
+  animation:slideUp .3s ease;
+  overflow:hidden;
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:10px auto 0;flex-shrink:0}
+
+.form-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 20px 12px;border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.form-header h2{font-family:'DM Serif Display',serif;font-size:18px;color:var(--green3)}
+.btn-close{background:var(--bg3);border:1px solid var(--border);color:var(--muted);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+
+/* El form-body hace scroll en móvil */
+.form-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch;}
+.form-body::-webkit-scrollbar{display:none}
+
+.form-section{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.section-title{background:var(--surface);padding:9px 14px;font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:1px;font-family:'DM Mono',monospace;border-bottom:1px solid var(--border);}
+
+/* Grid del form — 1 col en móvil */
+.form-grid{display:flex;flex-direction:column;gap:12px;padding:14px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group label{font-size:11px;color:var(--text2);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:6px;}
+.badge-req{font-size:10px;background:rgba(82,183,136,.15);border:1px solid rgba(82,183,136,.35);color:var(--green);border-radius:3px;padding:0 5px;font-family:'DM Mono',monospace;text-transform:none;letter-spacing:0;}
+.badge-opt{font-size:10px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--muted);border-radius:3px;padding:0 5px;font-family:'DM Mono',monospace;text-transform:none;letter-spacing:0;}
+
+/* Inputs touch-friendly: min 48px */
+.form-input{
+  background:var(--bg3);border:1.5px solid var(--border);color:var(--text);
+  border-radius:10px;padding:13px 14px;font-size:16px; /* 16px evita zoom en iOS */
+  font-family:'Outfit',sans-serif;outline:none;
+  transition:border-color .2s;width:100%;min-height:50px;
+}
+.form-input:focus{border-color:var(--green)}
+.form-input:disabled{opacity:.45;background:var(--bg2)}
+.form-input.has-error{border-color:var(--red)!important}
+.error-msg{font-size:12px;color:var(--red);font-family:'DM Mono',monospace;display:none;margin-top:2px}
+select.form-input{
+  cursor:pointer;
+  -webkit-appearance:none;-moz-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2374c69d' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-color:var(--bg3);background-repeat:no-repeat;background-position:right 14px center;padding-right:40px;
+}
+select.form-input option{background:var(--bg3);color:var(--text)}
+
+/* Toggle plantaciones */
+.plantaciones-toggle{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;gap:10px}
+.plantaciones-toggle label{font-size:14px;color:var(--text2);font-weight:500}
+.toggle-group{display:flex;border:1.5px solid var(--border);border-radius:10px;overflow:hidden}
+.toggle-btn{background:transparent;border:none;color:var(--muted);padding:10px 24px;cursor:pointer;font-size:14px;font-weight:700;font-family:'Outfit',sans-serif;min-height:44px}
+.toggle-btn.active{background:var(--green);color:#0d1f17}
+
+/* Frutales */
+.frutales-section{padding:0 14px 14px}
+.frutales-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-top:4px}
+.frutales-header span{font-size:12px;color:var(--text2);font-family:'DM Mono',monospace}
+.btn-add-frutal{background:transparent;border:1px dashed var(--border2);color:var(--green);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Outfit',sans-serif;min-height:40px}
+.frutal-row{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;display:flex;flex-direction:column;gap:8px}
+.frutal-row-top{display:flex;align-items:center;gap:8px}
+.frutal-num{width:24px;height:24px;background:var(--surface);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;flex-shrink:0}
+.form-input-sm{background:var(--bg3);border:1.5px solid var(--border);color:var(--text);border-radius:8px;padding:10px 12px;font-size:16px;width:100%;font-family:'Outfit',sans-serif;outline:none;min-height:48px;}
+.form-input-sm:focus{border-color:var(--green)}
+select.form-input-sm{
+  cursor:pointer;
+  -webkit-appearance:none;-moz-appearance:none;appearance:none;
+  padding-right:36px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2374c69d' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-color:var(--bg3);background-repeat:no-repeat;background-position:right 12px center;
+}
+select.form-input-sm option{background:var(--bg3);color:var(--text)}
+.btn-remove{background:transparent;border:1px solid var(--border);color:var(--red);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:13px;min-height:40px;white-space:nowrap}
+
+.form-footer{
+  display:flex;gap:10px;padding:12px 16px calc(12px + var(--safe-bot));
+  border-top:1px solid var(--border);flex-shrink:0;
+  background:var(--bg2);
+}
+.btn-cancel{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--muted);padding:14px;border-radius:10px;cursor:pointer;font-size:15px;font-family:'Outfit',sans-serif;min-height:50px}
+.btn-save{flex:2;background:linear-gradient(135deg,var(--green),#40916c);color:#0d1f17;border:none;padding:14px;border-radius:10px;cursor:pointer;font-size:15px;font-weight:700;font-family:'Outfit',sans-serif;min-height:50px}
+
+/* ══ DESKTOP (≥768px) ══ */
+@media(min-width:768px){
+  .app-header{padding:14px 28px}
+  .app-main{padding:24px 28px}
+  .stats-row{grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+  .stat-card{padding:20px 24px}
+  .stat-number{font-size:36px}
+  .stat-label{font-size:11px}
+
+  /* Desktop layout: table + sidebar map */
+  .desktop-layout{display:flex;gap:20px;align-items:flex-start}
+  .table-section{flex:1;min-width:0}
+  .map-sidebar{width:240px;flex-shrink:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;position:sticky;top:82px}
+  .map-container-mobile{max-width:100%}
+
+  /* Ocultar cards, mostrar tabla */
+  .campos-list{display:none}
+  .table-wrap{display:block}
+
+  /* Ocultar mapa standalone, mostrar sidebar */
+  .map-section{display:none}
+
+  /* Filter bar desktop */
+  .filter-bar{flex-direction:row;flex-wrap:nowrap;align-items:center}
+  .filter-input{flex:1;width:auto;min-width:160px}
+  .filter-select{width:auto;min-width:140px}
+  .filter-row{display:contents}
+
+  /* FAB oculto en desktop */
+  .fab{display:none!important}
+  .btn-new-header{display:flex}
+
+  /* Modal desktop: centrado */
+  .form-overlay{align-items:center;padding:20px}
+  .form-modal{border-radius:16px;max-width:860px;max-height:90dvh;animation:fadeUp .3s ease}
+  @keyframes fadeUp{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}
+  .sheet-handle{display:none}
+
+  .form-body{padding:20px 28px 4px}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:16px;flex-direction:unset}
+  .form-grid.cols3{grid-template-columns:1fr 1fr 1fr}
+  .span2{grid-column:1/-1}
+  .form-input{font-size:14px;min-height:44px;border-radius:8px;padding:10px 13px}
+  .form-input-sm{font-size:13px;min-height:38px;border-radius:6px}
+  .toggle-btn{padding:9px 26px}
+  .form-footer{padding:16px 28px 20px}
+  .btn-cancel,.btn-save{flex:none}
+  .btn-cancel{padding:10px 22px;min-height:44px}
+  .btn-save{padding:10px 28px;min-height:44px}
+  .frutales-section{padding:0 16px 16px}
+  .frutal-row{flex-direction:row;align-items:center;gap:8px;padding:6px 10px}
+  .frutal-row-top{flex:1}
+}
+
+/* ── TABLET (768px – 1024px) ── */
+@media(min-width:768px) and (max-width:1024px){
+  .form-modal{max-width:720px}
+  .form-grid{grid-template-columns:1fr 1fr}
+  .filter-row{flex-wrap:nowrap}
+}
+
+/* ── iOS Safari select fix ── */
+@supports (-webkit-touch-callout: none){
+  select.form-input,select.form-input-sm,.filter-select{
+    /* Restore native iOS picker — most reliable on Safari/iOS */
+    -webkit-appearance:menulist-button;
+    appearance:menulist-button;
+    background-image:none;
+    padding-right:12px;
+  }
+}
+
+/* ── Increase contrast of select arrow on dark bg ── */
+@media(prefers-color-scheme:dark){
+  select{color-scheme:dark}
+}
+
+/* ── Prevent text zoom on focus in older iOS ── */
+input,select,textarea{font-size:16px !important}
+@media(min-width:768px){
+  .form-input{font-size:14px !important}
+  .form-input-sm{font-size:13px !important}
+  .filter-input,.filter-select{font-size:14px !important}
+}
+
+  .logo-title{font-size:16px}
+  .logo-sub{display:none}
+  .stats-row{grid-template-columns:1fr 1fr;gap:8px}
+  .stat-number{font-size:24px}
+}
+</style>
+</head>
+<body>
+
+<div id="toast" class="toast" style="display:none"></div>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="logo">
+    <span class="logo-icon">🌿</span>
+    <div>
+      <div class="logo-title">Terragro <span>Intelligence</span></div>
+      <div class="logo-sub">Corretaje Agrícola</div>
+    </div>
+  </div>
+  <button class="btn-new-header" onclick="abrirFormulario()">+ Registrar</button>
+</header>
+
+<!-- MAIN -->
+<main class="app-main" id="mainContent"></main>
+
+<!-- FAB mobile -->
+<button class="fab" id="fabBtn" onclick="abrirFormulario()">+</button>
+
+<!-- ═══════════ MODAL ═══════════ -->
+<div class="form-overlay" id="formOverlay" style="display:none">
+ <div class="form-modal" id="formModal">
+  <div class="sheet-handle"></div>
+  <div class="form-header">
+    <h2 id="formTitle">🌿 Nuevo Campo</h2>
+    <button class="btn-close" onclick="cerrarFormulario()">✕</button>
+  </div>
+
+  <div class="form-body">
+
+    <!-- 1. Info General -->
+    <div class="form-section">
+      <div class="section-title">📋 Información General</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Fecha Ingreso</label>
+          <input class="form-input" id="f_fecha" disabled/>
+        </div>
+        <div class="form-group">
+          <label>Ejecutivo <span class="badge-req">requerido</span></label>
+          <select class="form-input" id="f_ejecutivo">
+            <option value="">— Seleccionar —</option>
+            <option>Benjamin Rodriguez</option>
+            <option>Gustavo Adasme</option>
+            <option>Matias Garcia Huidobro</option>
+            <option>Melissa Guzman</option>
+            <option>Pilar Rodriguez</option>
+          </select>
+          <span class="error-msg" id="err_ejecutivo">⚠ Selecciona un ejecutivo</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Propietario -->
+    <div class="form-section">
+      <div class="section-title">🏢 Propietario</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nombre Dueño / Empresa <span class="badge-opt">opcional</span></label>
+          <input class="form-input" id="f_dueno" placeholder="Razón social o nombre"/>
+        </div>
+        <div class="form-group">
+          <label>RUT <span class="badge-opt">opcional</span></label>
+          <input class="form-input" id="f_rut" placeholder="12345678-9" maxlength="12" inputmode="text"/>
+        </div>
+        <div class="form-group">
+          <label>Nombre Encargado <span class="badge-opt">opcional</span></label>
+          <input class="form-input" id="f_encargado" placeholder="Encargado en terreno"/>
+        </div>
+        <div class="form-group">
+          <label>Teléfono Encargado <span class="badge-opt">opcional</span></label>
+          <input class="form-input" id="f_telefono" type="tel" placeholder="+56 9 XXXX XXXX" inputmode="tel"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Ubicación -->
+    <div class="form-section">
+      <div class="section-title">📍 Ubicación</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Región <span class="badge-opt">opcional</span></label>
+          <select class="form-input" id="f_region" onchange="onRegionChange()">
+            <option value="">— Seleccionar región —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Comuna <span class="badge-opt">opcional</span></label>
+          <select class="form-input" id="f_comuna">
+            <option value="">— Elige región primero —</option>
+          </select>
+        </div>
+        <div class="form-group span2">
+          <label>Link Google Maps <span class="badge-opt">opcional</span></label>
+          <input class="form-input" id="f_gmaps" placeholder="https://maps.google.com/..." inputmode="url"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Datos Campo -->
+    <div class="form-section">
+      <div class="section-title">🌾 Datos del Campo</div>
+      <div class="form-grid">
+        <div class="form-group span2">
+          <label>Nombre del Campo <span class="badge-req">requerido</span></label>
+          <input class="form-input" id="f_nombre" placeholder="Ej: Fundo Las Mercedes"/>
+          <span class="error-msg" id="err_nombre">⚠ Ingresa el nombre del campo</span>
+        </div>
+        <div class="form-group">
+          <label>ROL <span class="badge-opt">opcional</span></label>
+          <input class="form-input" id="f_rol" placeholder="12345-67890" maxlength="11" inputmode="numeric"/>
+          <span class="error-msg" id="err_rol">⚠ Formato: 12345-67890</span>
+        </div>
+        <div class="form-group">
+          <label>Superficie <span class="badge-opt">ha</span></label>
+          <input class="form-input" id="f_superficie" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal"/>
+        </div>
+        <div class="form-group">
+          <label>DDAA <span class="badge-opt">l/s</span></label>
+          <input class="form-input" id="f_ddaa" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Plantaciones -->
+    <div class="form-section">
+      <div class="section-title">🍎 Plantaciones Frutales</div>
+      <div class="plantaciones-toggle">
+        <label>¿Tiene plantaciones?</label>
+        <div class="toggle-group">
+          <button type="button" class="toggle-btn" id="btn_si" onclick="setPlantaciones('SI')">SI</button>
+          <button type="button" class="toggle-btn active" id="btn_no" onclick="setPlantaciones('NO')">NO</button>
+        </div>
+      </div>
+      <div id="frutales_container" style="display:none">
+        <div class="frutales-section">
+          <div class="frutales-header">
+            <span id="frutales_count">Especies: 0 / 5</span>
+            <button type="button" class="btn-add-frutal" id="btn_add_frutal" onclick="addFrutal()">+ Agregar</button>
+          </div>
+          <div id="frutales_list"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /form-body -->
+
+  <div class="form-footer">
+    <button class="btn-cancel" onclick="cerrarFormulario()">Cancelar</button>
+    <button class="btn-save" id="btnGuardar" onclick="guardarCampo()">✅ Guardar Campo</button>
+  </div>
+ </div>
+</div>
+
+<script>
+// ─── Datos ────────────────────────────────────────────────────────────────────
+const REGIONES_COMUNAS={
+  "Arica y Parinacota":["Arica","Camarones","Putre","General Lagos"],
+  "Tarapacá":["Iquique","Alto Hospicio","Pozo Almonte","Camiña","Colchane","Huara","Pica"],
+  "Antofagasta":["Antofagasta","Mejillones","Sierra Gorda","Taltal","Calama","Ollagüe","San Pedro de Atacama","Tocopilla","María Elena"],
+  "Atacama":["Copiapó","Caldera","Tierra Amarilla","Chañaral","Diego de Almagro","Vallenar","Alto del Carmen","Freirina","Huasco"],
+  "Coquimbo":["La Serena","Coquimbo","Andacollo","La Higuera","Paihuano","Vicuña","Illapel","Canela","Los Vilos","Salamanca","Ovalle","Combarbalá","Monte Patria","Punitaqui","Río Hurtado"],
+  "Valparaíso":["Valparaíso","Casablanca","Concón","Juan Fernández","Puchuncaví","Quintero","Viña del Mar","Isla de Pascua","Los Andes","Calle Larga","Rinconada","San Esteban","La Ligua","Cabildo","Papudo","Petorca","Zapallar","Quillota","Calera","Hijuelas","La Cruz","Nogales","San Antonio","Algarrobo","Cartagena","El Quisco","El Tabo","Santo Domingo","San Felipe","Catemu","Llaillay","Panquehue","Putaendo","Santa María","Quilpué","Limache","Olmué","Villa Alemana"],
+  "Región Metropolitana":["Santiago","Cerrillos","Cerro Navia","Conchalí","El Bosque","Estación Central","Huechuraba","Independencia","La Cisterna","La Florida","La Granja","La Pintana","La Reina","Las Condes","Lo Barnechea","Lo Espejo","Lo Prado","Macul","Maipú","Ñuñoa","Pedro Aguirre Cerda","Peñalolén","Providencia","Pudahuel","Quilicura","Quinta Normal","Recoleta","Renca","San Joaquín","San Miguel","San Ramón","Vitacura","Puente Alto","Pirque","San José de Maipo","Colina","Lampa","Tiltil","San Bernardo","Buin","Calera de Tango","Paine","Melipilla","Alhué","Curacaví","María Pinto","San Pedro","Talagante","El Monte","Isla de Maipo","Padre Hurtado","Peñaflor"],
+  "O'Higgins":["Rancagua","Codegua","Coinco","Coltauco","Doñihue","Graneros","Las Cabras","Machalí","Malloa","Mostazal","Olivar","Peumo","Pichidegua","Quinta de Tilcoco","Rengo","Requínoa","San Vicente","Pichilemu","La Estrella","Litueche","Marchihue","Navidad","Paredones","San Fernando","Chépica","Chimbarongo","Lolol","Nancagua","Palmilla","Peralillo","Placilla","Pumanque","Santa Cruz"],
+  "Maule":["Talca","Constitución","Curepto","Empedrado","Maule","Pelarco","Pencahue","Río Claro","San Clemente","San Rafael","Cauquenes","Chanco","Pelluhue","Curicó","Hualañé","Licantén","Molina","Rauco","Romeral","Sagrada Familia","Teno","Vichuquén","Linares","Colbún","Longaví","Parral","Retiro","San Javier","Villa Alegre","Yerbas Buenas"],
+  "Ñuble":["Chillán","Bulnes","Chillán Viejo","El Carmen","Pemuco","Pinto","Quillón","San Ignacio","Yungay","Quirihue","Cobquecura","Coelemu","Ninhue","Portezuelo","Ranquil","Treguaco","San Carlos","Coihueco","Ñiquén","San Fabián","San Nicolás"],
+  "Biobío":["Concepción","Coronel","Chiguayante","Florida","Hualqui","Lota","Penco","San Pedro de la Paz","Santa Juana","Talcahuano","Tomé","Hualpén","Lebu","Arauco","Cañete","Contulmo","Curanilahue","Los Álamos","Tirúa","Los Ángeles","Antuco","Cabrero","Laja","Mulchén","Nacimiento","Negrete","Quilaco","Quilleco","San Rosendo","Santa Bárbara","Tucapel","Yumbel","Alto Biobío"],
+  "La Araucanía":["Temuco","Carahue","Cunco","Curarrehue","Freire","Galvarino","Gorbea","Lautaro","Loncoche","Melipeuco","Nueva Imperial","Padre las Casas","Perquenco","Pitrufquén","Pucón","Saavedra","Teodoro Schmidt","Toltén","Vilcún","Villarrica","Cholchol","Angol","Collipulli","Curacautín","Ercilla","Lonquimay","Los Sauces","Lumaco","Purén","Renaico","Traiguén","Victoria"],
+  "Los Ríos":["Valdivia","Corral","Futrono","La Unión","Lago Ranco","Lanco","Los Lagos","Máfil","Mariquina","Paillaco","Panguipulli","Río Bueno"],
+  "Los Lagos":["Puerto Montt","Calbuco","Cochamó","Fresia","Frutillar","Los Muermos","Llanquihue","Maullín","Puerto Varas","Castro","Ancud","Chonchi","Curaco de Vélez","Dalcahue","Puqueldón","Queilén","Quemchi","Quínchao","Osorno","Puerto Octay","Purranque","Puyehue","Río Negro","San Juan de la Costa","San Pablo","Chaitén","Futaleufú","Hualaihué","Palena"],
+  "Aysén":["Coyhaique","Lago Verde","Aysén","Cisnes","Guaitecas","Cochrane","O'Higgins","Tortel","Chile Chico","Río Ibáñez"],
+  "Magallanes":["Punta Arenas","Laguna Blanca","Río Verde","San Gregorio","Cabo de Hornos","Antártica","Porvenir","Primavera","Timaukel","Natales","Torres del Paine"]
+};
+const FRUTALES_OPTIONS=["Manzano","Peral","Cerezo","Ciruelo","Duraznero","Nectarino","Kiwi","Vid de Mesa","Vid Vinif.","Arándano","Frambuesa","Frutilla","Nogal","Avellano Europeo","Almendro","Limonero","Naranjo","Mandarina","Palto","Olivo","Otro"];
+const REGION_COORDS={
+  "Arica y Parinacota":[-18.478,-70.322],"Tarapacá":[-20.213,-70.152],
+  "Antofagasta":[-23.650,-70.398],"Atacama":[-27.366,-70.331],
+  "Coquimbo":[-29.954,-71.339],"Valparaíso":[-33.047,-71.612],
+  "Región Metropolitana":[-33.457,-70.648],"O'Higgins":[-34.170,-70.744],
+  "Maule":[-35.426,-71.655],"Ñuble":[-36.607,-71.960],
+  "Biobío":[-37.469,-72.353],"La Araucanía":[-38.735,-72.590],
+  "Los Ríos":[-39.814,-73.246],"Los Lagos":[-41.472,-72.937],
+  "Aysén":[-45.575,-72.066],"Magallanes":[-53.154,-70.912]
+};
+
+// ─── Storage ──────────────────────────────────────────────────────────────────
+const STORAGE_KEY='terragro_v3';
+let campos=[];
+try{campos=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');}catch(e){}
+function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(campos));}catch(e){}}
+
+// ─── Utils ────────────────────────────────────────────────────────────────────
+function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}
+function today(){return new Date().toLocaleDateString('es-CL')}
+function isMobile(){return window.innerWidth<768}
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast '+type;t.style.display='block';
+  setTimeout(()=>t.style.display='none',3000);
+}
+function isIncomplete(c){return !c.nombreDueno||!c.rutDueno||!c.region||!c.comuna||!c.rol||!c.superficie}
+
+// ─── Mapa SVG Chile ───────────────────────────────────────────────────────────
+const SVG_W=200,SVG_H=700,LAT_MAX=-16.5,LAT_MIN=-56.5,LON_MIN=-76.0,LON_MAX=-65.0;
+function geo2svg(lat,lon){return[((lon-LON_MIN)/(LON_MAX-LON_MIN))*SVG_W,((LAT_MAX-lat)/(LAT_MAX-LAT_MIN))*SVG_H]}
+const CHILE_COAST=[
+  [-17.50,-70.33],[-17.70,-70.60],[-18.10,-70.60],[-18.40,-70.35],[-18.70,-70.20],
+  [-19.10,-70.15],[-19.60,-70.18],[-20.25,-70.13],[-20.55,-70.16],[-21.00,-70.22],
+  [-21.45,-70.40],[-22.00,-70.18],[-22.55,-70.38],[-23.00,-70.58],[-23.40,-70.60],
+  [-23.65,-70.42],[-24.00,-70.40],[-24.50,-70.56],[-24.90,-70.64],[-25.30,-70.64],
+  [-25.70,-70.65],[-26.00,-70.68],[-26.40,-70.72],[-27.00,-70.90],[-27.50,-70.88],
+  [-28.00,-71.10],[-28.50,-71.28],[-29.00,-71.26],[-29.40,-71.34],[-29.90,-71.35],
+  [-30.10,-71.51],[-30.40,-71.64],[-30.80,-71.70],[-31.10,-71.60],[-31.50,-71.60],
+  [-31.80,-71.60],[-32.00,-71.52],[-32.30,-71.55],[-32.70,-71.62],[-33.00,-71.63],
+  [-33.30,-71.64],[-33.60,-71.65],[-33.90,-71.68],[-34.20,-72.00],[-34.50,-72.00],
+  [-34.80,-72.02],[-35.10,-72.10],[-35.40,-72.42],[-35.70,-72.60],[-36.10,-72.80],
+  [-36.50,-73.10],[-36.80,-73.23],[-37.20,-73.42],[-37.60,-73.68],[-38.00,-73.68],
+  [-38.20,-73.72],[-38.50,-73.86],[-38.80,-73.80],[-39.10,-73.64],[-39.40,-73.64],
+  [-39.80,-73.74],[-40.10,-73.74],[-40.40,-73.70],[-40.70,-73.84],[-41.00,-73.74],
+  [-41.30,-73.63],[-41.60,-73.76],[-41.90,-73.70],[-42.20,-73.90],[-42.50,-73.90],
+  [-43.00,-74.20],[-43.50,-74.60],[-43.80,-75.00],[-44.20,-75.40],[-44.60,-75.60],
+  [-45.00,-75.40],[-45.40,-75.60],[-45.80,-75.40],[-46.20,-75.20],[-46.60,-74.90],
+  [-47.00,-74.60],[-47.40,-74.30],[-47.80,-74.70],[-48.20,-75.00],[-48.60,-75.40],
+  [-49.00,-75.20],[-49.40,-75.60],[-49.80,-75.80],[-50.20,-75.50],[-50.60,-75.30],
+  [-51.00,-74.90],[-51.40,-74.50],[-51.80,-74.60],[-52.20,-74.40],[-52.60,-74.20],
+  [-53.00,-74.00],[-53.20,-73.40],[-53.50,-72.80],[-53.80,-72.40],[-54.00,-71.80],
+  [-54.20,-71.20],[-54.40,-70.80],[-54.60,-70.50],[-54.80,-70.20],[-55.00,-69.60],
+  [-55.20,-69.00],[-55.50,-68.50],[-55.80,-67.60],[-55.90,-67.00],
+  [-55.70,-67.50],[-55.40,-68.00],[-55.00,-68.40],[-54.60,-68.80],[-54.20,-68.80],
+  [-53.80,-68.80],[-53.40,-69.00],[-53.00,-68.90],[-52.50,-69.00],[-52.00,-69.20],
+  [-51.50,-69.50],[-51.00,-72.00],[-50.50,-72.50],[-50.00,-73.00],[-49.50,-72.80],
+  [-49.00,-72.60],[-48.50,-72.80],[-48.00,-73.10],[-47.50,-72.80],[-47.00,-72.50],
+  [-46.50,-72.20],[-46.00,-72.00],[-45.50,-72.10],[-45.00,-71.80],[-44.50,-71.60],
+  [-44.00,-71.60],[-43.50,-71.70],[-43.00,-72.00],[-42.50,-72.20],[-42.00,-72.00],
+  [-41.50,-71.80],[-41.00,-71.60],[-40.50,-71.60],[-40.00,-71.60],[-39.50,-71.50],
+  [-39.00,-71.00],[-38.50,-71.00],[-38.00,-71.00],[-37.50,-71.00],[-37.00,-71.00],
+  [-36.50,-71.00],[-36.00,-71.00],[-35.50,-70.60],[-35.00,-70.50],[-34.50,-70.50],
+  [-34.00,-70.40],[-33.50,-70.00],[-33.00,-70.00],[-32.50,-70.30],[-32.00,-70.40],
+  [-31.50,-70.50],[-31.00,-70.60],[-30.50,-70.60],[-30.00,-70.20],[-29.50,-70.00],
+  [-29.00,-69.90],[-28.50,-69.80],[-28.00,-69.60],[-27.50,-69.60],[-27.00,-69.60],
+  [-26.50,-69.50],[-26.00,-69.30],[-25.50,-69.10],[-25.00,-69.00],[-24.50,-68.60],
+  [-24.00,-68.30],[-23.50,-68.00],[-23.00,-68.20],[-22.50,-68.40],[-22.00,-68.50],
+  [-21.50,-68.50],[-21.00,-68.40],[-20.50,-68.60],[-20.00,-68.90],[-19.50,-69.20],
+  [-19.00,-69.40],[-18.50,-69.60],[-18.00,-69.80],[-17.80,-70.00],[-17.50,-70.33]
+];
+
+function buildMapSVG(filtrados){
+  const pts=CHILE_COAST.map(([lat,lon])=>{const[x,y]=geo2svg(lat,lon);return x.toFixed(1)+','+y.toFixed(1)}).join(' ');
+  const byR={},totR={};
+  filtrados.forEach(c=>{if(c.region)byR[c.region]=(byR[c.region]||0)+1});
+  campos.forEach(c=>{if(c.region)totR[c.region]=(totR[c.region]||0)+1});
+  let dots='';
+  for(const[region,[lat,lon]]of Object.entries(REGION_COORDS)){
+    const[cx,cy]=geo2svg(lat,lon);
+    const filt=byR[region]||0,total=totR[region]||0;
+    const active=filt>0,hasData=total>0;
+    const r=active?Math.min(4+filt*1.5,11):(hasData?3.5:2.2);
+    dots+=`<g class="rdot" data-region="${region}" data-f="${filt}" data-t="${total}">`;
+    if(active)dots+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${(r+5).toFixed(1)}" fill="#52b788" opacity="0.18"/>`;
+    dots+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r.toFixed(1)}" fill="${active?'#52b788':hasData?'#2d6a4f':'#1a3a28'}" stroke="${active?'#b7e4c7':hasData?'#52b788':'#2d5a3d'}" stroke-width="${active?1.2:0.7}"/>`;
+    if(active)dots+=`<text x="${cx.toFixed(1)}" y="${cy.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="${filt>9?'4':'5'}" font-weight="700" fill="#0d1f17" font-family="monospace">${filt}</text>`;
+    dots+=`</g>`;
+  }
+  return `<svg id="chileSVG" viewBox="0 0 ${SVG_W} ${SVG_H}" style="width:100%;display:block">
+    <defs><linearGradient id="cg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1a3d2a"/><stop offset="100%" stop-color="#0f2218"/></linearGradient></defs>
+    <polygon points="${pts}" fill="url(#cg)" stroke="#2d5a3d" stroke-width="0.8" stroke-linejoin="round"/>
+    ${dots}
+  </svg>`;
+}
+
+// ─── Dashboard ────────────────────────────────────────────────────────────────
+let filters={region:'',ejecutivo:'',plantaciones:'',search:''};
+function limpiarFiltros(){filters={region:'',ejecutivo:'',plantaciones:'',search:''};renderDashboard();}
+
+function renderDashboard(){
+  const filtrados=campos.filter(c=>{
+    if(filters.region&&c.region!==filters.region)return false;
+    if(filters.plantaciones&&c.plantaciones!==filters.plantaciones)return false;
+    if(filters.ejecutivo&&c.ejecutivo!==filters.ejecutivo)return false;
+    if(filters.search){
+      const q=filters.search.toLowerCase();
+      if(!(c.nombreCampo||'').toLowerCase().includes(q)&&!(c.nombreDueno||'').toLowerCase().includes(q)&&!(c.comuna||'').toLowerCase().includes(q))return false;
+    }
+    return true;
+  });
+  const totalHa=filtrados.reduce((s,c)=>s+(parseFloat(c.superficie)||0),0);
+  const ejecutivos=[...new Set(campos.map(c=>c.ejecutivo).filter(Boolean))];
+  const hasFilter=filters.region||filters.plantaciones||filters.ejecutivo||filters.search;
+
+  // ── CARDS MOBILE ──
+  let cardsHtml='';
+  if(campos.length===0){
+    cardsHtml=`<div class="empty-state"><div class="empty-icon">🌿</div><p>Sin campos registrados.<br>Toca el botón + para comenzar.</p></div>`;
+  } else if(filtrados.length===0){
+    cardsHtml=`<div class="empty-state"><div class="empty-icon">🔍</div><p>Sin resultados para los filtros aplicados.</p></div>`;
+  } else {
+    cardsHtml=filtrados.map(c=>{
+      const regionCorta=(c.region||'').replace('Región Metropolitana','R.M.');
+      const incompleto=isIncomplete(c);
+      const frutalesList=c.plantaciones==='SI'&&c.frutales&&c.frutales.length>0
+        ?c.frutales.filter(f=>f.frutal).map(f=>f.frutal).join(', '):'';
+      return `<div class="campo-card">
+        <div class="card-top">
+          <div>
+            <div class="card-title">${c.nombreCampo||'Sin nombre'}</div>
+            ${c.rol?`<div class="card-rol">ROL ${c.rol}</div>`:''}
+          </div>
+          <div class="card-badges">
+            <span class="plant-badge ${c.plantaciones==='SI'?'si':'no'}">${c.plantaciones==='SI'?'🍎 SI':'Sin plant.'}</span>
+            ${incompleto?`<span class="incomplete-badge">⚠</span>`:''}
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-field"><div class="card-field-label">Propietario</div><div class="card-field-value">${c.nombreDueno||'—'}</div></div>
+          <div class="card-field"><div class="card-field-label">Ejecutivo</div><div class="card-field-value">${c.ejecutivo||'—'}</div></div>
+          <div class="card-field"><div class="card-field-label">Ubicación</div><div class="card-field-value">${regionCorta?`${regionCorta}${c.comuna?', '+c.comuna:''}`:c.comuna||'—'}</div></div>
+          <div class="card-field"><div class="card-field-label">Superficie</div><div class="card-field-value">${c.superficie?Number(c.superficie).toLocaleString('es-CL')+' ha':'—'}</div></div>
+          ${frutalesList?`<div class="card-field" style="grid-column:1/-1"><div class="card-field-label">Frutales</div><div class="card-field-value">${frutalesList}</div></div>`:''}
+        </div>
+        <div class="card-actions">
+          ${c.ubicacionGmaps?`<a href="${c.ubicacionGmaps}" target="_blank" class="btn-card map-link">📍 Mapa</a>`:''}
+          <button class="btn-card edit" onclick="editarCampo('${c.id}')">✏️ Editar</button>
+          <button class="btn-card del" onclick="eliminarCampo('${c.id}')">🗑️ Borrar</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── TABLE DESKTOP ──
+  let tableHtml='';
+  if(filtrados.length>0){
+    const rows=filtrados.map(c=>{
+      const regionCorta=(c.region||'').replace('Región Metropolitana','R.M.');
+      const incompleto=isIncomplete(c);
+      const frutalesList=c.plantaciones==='SI'&&c.frutales&&c.frutales.length>0
+        ?c.frutales.filter(f=>f.frutal).map(f=>f.frutal+(f.superficie?' ('+Number(f.superficie).toLocaleString('es-CL')+' ha)':'')).join(', '):'';
+      return `<tr>
+        <td><span class="date-badge">${c.fechaIngreso||''}</span></td>
+        <td>
+          <div class="campo-name">${c.nombreCampo}</div>
+          ${c.rol?`<div class="campo-rol">ROL ${c.rol}</div>`:''}
+          ${incompleto?`<div class="incomplete-badge">⚠ Incompleto</div>`:''}
+        </td>
+        <td><div>${c.nombreDueno||'<em style="color:var(--muted);font-size:12px">Sin datos</em>'}</div>${c.rutDueno?`<div class="sub-text">${c.rutDueno}</div>`:''}</td>
+        <td>${regionCorta?`<span class="region-tag">${regionCorta}</span>`:'-'}</td>
+        <td>${c.comuna||'-'}</td>
+        <td class="num-cell">${c.superficie?Number(c.superficie).toLocaleString('es-CL'):'—'}</td>
+        <td class="num-cell">${c.ddaa||'—'}</td>
+        <td><span class="plant-badge ${c.plantaciones==='SI'?'si':'no'}">${c.plantaciones}</span>${frutalesList?`<div class="sub-text" style="max-width:120px;white-space:normal;line-height:1.4">${frutalesList}</div>`:''}</td>
+        <td>${c.ejecutivo||'-'}</td>
+        <td>
+          <div class="action-btns">
+            ${c.ubicacionGmaps?`<a href="${c.ubicacionGmaps}" target="_blank" class="btn-action" title="Mapa">📍</a>`:''}
+            <button class="btn-action" onclick="editarCampo('${c.id}')" title="Editar">✏️</button>
+            <button class="btn-action del" onclick="eliminarCampo('${c.id}')" title="Eliminar">🗑️</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+    tableHtml=`<div class="table-wrap"><table class="campos-table">
+      <thead><tr><th>Fecha</th><th>Campo</th><th>Propietario</th><th>Región</th><th>Comuna</th><th>Ha</th><th>DDAA</th><th>Plantaciones</th><th>Ejecutivo</th><th></th></tr></thead>
+      <tbody>${rows}</tbody></table></div>`;
+  } else if(campos.length>0){
+    tableHtml=`<div class="empty-state"><div class="empty-icon">🔍</div><p>Sin resultados.</p></div>`;
+  } else {
+    tableHtml=`<div class="empty-state"><div class="empty-icon">🌿</div><p>No hay campos registrados aún.</p><button class="btn-new" onclick="abrirFormulario()">+ Registrar primer campo</button></div>`;
+  }
+
+  const ejOpts=ejecutivos.map(e=>`<option value="${e}" ${filters.ejecutivo===e?'selected':''}>${e}</option>`).join('');
+  const mapSVG=buildMapSVG(filtrados);
+
+  document.getElementById('mainContent').innerHTML=`
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-number">${campos.length}</div><div class="stat-label">Campos</div></div>
+      <div class="stat-card"><div class="stat-number">${filtrados.length}</div><div class="stat-label">Filtrados</div></div>
+      <div class="stat-card"><div class="stat-number">${totalHa.toLocaleString('es-CL',{maximumFractionDigits:1})}</div><div class="stat-label">Hectáreas</div></div>
+      <div class="stat-card"><div class="stat-number">${filtrados.filter(c=>c.plantaciones==='SI').length}</div><div class="stat-label">Plantaciones</div></div>
+    </div>
+
+    <div class="filter-bar">
+      <input class="filter-input" placeholder="🔍 Buscar..." value="${filters.search}" oninput="filters.search=this.value;renderDashboard()"/>
+      <div class="filter-row">
+        <select class="filter-select" onchange="filters.region=this.value;renderDashboard()">
+          <option value="">Todas las regiones</option>
+          ${Object.keys(REGIONES_COMUNAS).map(r=>`<option value="${r}" ${filters.region===r?'selected':''}>${r}</option>`).join('')}
+        </select>
+        <select class="filter-select" onchange="filters.ejecutivo=this.value;renderDashboard()">
+          <option value="">Todos los ejecutivos</option>
+          ${ejOpts}
+        </select>
+        <select class="filter-select" onchange="filters.plantaciones=this.value;renderDashboard()">
+          <option value="">Plantaciones</option>
+          <option value="SI" ${filters.plantaciones==='SI'?'selected':''}>Con plant.</option>
+          <option value="NO" ${filters.plantaciones==='NO'?'selected':''}>Sin plant.</option>
+        </select>
+        ${hasFilter?'<button class="btn-clear-filter" onclick="limpiarFiltros()">✕ Limpiar</button>':''}
+      </div>
+    </div>
+
+    <!-- Mapa (móvil: arriba de las cards) -->
+    <div class="map-section">
+      <div class="map-title">🗺 Distribución en Chile</div>
+      <div class="map-subtitle">${filtrados.length} campo${filtrados.length!==1?'s':''} activos en el filtro</div>
+      <div class="map-container-mobile">${mapSVG}</div>
+      <div class="map-legend">
+        <span><span class="legend-dot active"></span>Activos (filtro)</span>
+        <span><span class="legend-dot total"></span>Total base</span>
+      </div>
+    </div>
+
+    <!-- Layout desktop: tabla + mapa sidebar -->
+    <div class="desktop-layout">
+      <div class="table-section">
+        <!-- Cards móvil -->
+        <div class="campos-list">${cardsHtml}</div>
+        <!-- Tabla desktop -->
+        ${tableHtml}
+      </div>
+      <div class="map-sidebar">
+        <div class="map-title">🗺 Distribución</div>
+        <div class="map-subtitle">${filtrados.length} campo${filtrados.length!==1?'s':''} en filtro</div>
+        <div class="map-container-mobile">${mapSVG}</div>
+        <div class="map-legend">
+          <div><span class="legend-dot active"></span>Activos</div>
+          <div><span class="legend-dot total"></span>Total</div>
+        </div>
+      </div>
+    </div>`;
+
+  // Mostrar/ocultar FAB en móvil
+  const fab=document.getElementById('fabBtn');
+  fab.style.display=isMobile()?'flex':'none';
+}
+
+// ─── Formulario ───────────────────────────────────────────────────────────────
+let editId=null,plantacionesVal='NO',frutales=[{frutal:'',superficie:''}];
+
+function poblarRegiones(){
+  const sel=document.getElementById('f_region');
+  sel.innerHTML='<option value="">— Seleccionar región —</option>';
+  Object.keys(REGIONES_COMUNAS).forEach(r=>sel.innerHTML+=`<option value="${r}">${r}</option>`);
+}
+function onRegionChange(){
+  const region=document.getElementById('f_region').value;
+  const sel=document.getElementById('f_comuna');
+  sel.innerHTML='<option value="">— Seleccionar —</option>';
+  if(region&&REGIONES_COMUNAS[region])
+    REGIONES_COMUNAS[region].forEach(c=>sel.innerHTML+=`<option value="${c}">${c}</option>`);
+}
+function setPlantaciones(val){
+  plantacionesVal=val;
+  document.getElementById('btn_si').className='toggle-btn'+(val==='SI'?' active':'');
+  document.getElementById('btn_no').className='toggle-btn'+(val==='NO'?' active':'');
+  document.getElementById('frutales_container').style.display=val==='SI'?'block':'none';
+  renderFrutales();
+}
+function renderFrutales(){
+  const list=document.getElementById('frutales_list'); if(!list)return;
+  document.getElementById('frutales_count').textContent=`Especies: ${frutales.length} / 5`;
+  document.getElementById('btn_add_frutal').style.display=frutales.length>=5?'none':'inline-block';
+  list.innerHTML=frutales.map((fr,i)=>`
+    <div class="frutal-row">
+      <div class="frutal-row-top">
+        <span class="frutal-num">${i+1}</span>
+        <select class="form-input-sm" style="flex:1" onchange="frutales[${i}].frutal=this.value">
+          <option value="">— Especie —</option>
+          ${FRUTALES_OPTIONS.map(f=>`<option value="${f}" ${fr.frutal===f?'selected':''}>${f}</option>`).join('')}
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input class="form-input-sm" style="flex:1" type="number" min="0" step="0.01" placeholder="Superficie (ha)" value="${fr.superficie||''}" oninput="frutales[${i}].superficie=this.value"/>
+        ${frutales.length>1?`<button class="btn-remove" onclick="removeFrutal(${i})">✕ Quitar</button>`:''}
+      </div>
+    </div>`).join('');
+}
+function addFrutal(){if(frutales.length>=5)return;frutales.push({frutal:'',superficie:''});renderFrutales()}
+function removeFrutal(i){frutales.splice(i,1);renderFrutales()}
+
+function clearErrors(){
+  ['ejecutivo','nombre','rol'].forEach(k=>{
+    const e=document.getElementById('err_'+k),i=document.getElementById('f_'+k);
+    if(e)e.style.display='none';if(i)i.classList.remove('has-error');
+  });
+}
+
+// Swipe down para cerrar modal en móvil
+var touchStartY=0;
+window.addEventListener('load',function(){
+  var modal=document.getElementById('formModal');
+  if(modal){
+    modal.addEventListener('touchstart',function(e){touchStartY=e.touches[0].clientY;},{passive:true});
+    modal.addEventListener('touchend',function(e){
+      var dy=e.changedTouches[0].clientY-touchStartY;
+      if(dy>80&&modal.scrollTop<=0) cerrarFormulario();
+    },{passive:true});
+  }
+});
+
+function abrirFormulario(campo){
+  editId=campo?campo.id:null;
+  document.getElementById('formTitle').textContent=campo?'✏️ Editar Campo':'🌿 Nuevo Campo';
+  document.getElementById('btnGuardar').textContent=campo?'💾 Guardar':'✅ Guardar Campo';
+  poblarRegiones();
+  document.getElementById('f_fecha').value=campo?campo.fechaIngreso:today();
+  document.getElementById('f_ejecutivo').value=campo?campo.ejecutivo:'';
+  document.getElementById('f_dueno').value=campo?campo.nombreDueno:'';
+  document.getElementById('f_rut').value=campo?campo.rutDueno:'';
+  document.getElementById('f_encargado').value=campo?campo.nombreEncargado:'';
+  document.getElementById('f_telefono').value=campo?campo.telefonoEncargado:'';
+  document.getElementById('f_rol').value=campo?campo.rol:'';
+  document.getElementById('f_nombre').value=campo?campo.nombreCampo:'';
+  document.getElementById('f_superficie').value=campo?campo.superficie:'';
+  document.getElementById('f_ddaa').value=campo?campo.ddaa:'';
+  document.getElementById('f_gmaps').value=campo?campo.ubicacionGmaps:'';
+  if(campo&&campo.region){
+    document.getElementById('f_region').value=campo.region;
+    onRegionChange();
+    document.getElementById('f_comuna').value=campo.comuna||'';
+  } else {
+    document.getElementById('f_region').value='';
+    document.getElementById('f_comuna').innerHTML='<option value="">— Elige región primero —</option>';
+  }
+  plantacionesVal=campo?campo.plantaciones:'NO';
+  frutales=campo&&campo.frutales&&campo.frutales.length>0?JSON.parse(JSON.stringify(campo.frutales)):[{frutal:'',superficie:''}];
+  setPlantaciones(plantacionesVal);
+  clearErrors();
+  document.getElementById('formOverlay').style.display='flex';
+  document.querySelector('.form-body').scrollTop=0;
+  // Prevenir scroll del body
+  document.body.style.overflow='hidden';
+}
+function cerrarFormulario(){
+  document.getElementById('formOverlay').style.display='none';
+  document.body.style.overflow='';
+}
+
+// Formatear ROL y RUT
+(function(){
+  var fr=document.getElementById('f_rol');
+  if(fr) fr.addEventListener('input',function(){
+    var clean=this.value.replace(/[^0-9\-]/g,'');
+    var parts=clean.split('-');
+    if(parts[0])parts[0]=parts[0].slice(0,5);
+    if(parts[1])parts[1]=parts[1].slice(0,5);
+    this.value=parts.slice(0,2).join(parts.length>1?'-':'');
+  });
+  var rut=document.getElementById('f_rut');
+  if(rut) rut.addEventListener('input',function(){
+    this.value=this.value.replace(/[^0-9kK\-]/g,'').toUpperCase();
+  });
+})();
+
+function guardarCampo(){
+  let ok=true;clearErrors();
+  if(!document.getElementById('f_ejecutivo').value){
+    document.getElementById('err_ejecutivo').style.display='block';
+    document.getElementById('f_ejecutivo').classList.add('has-error');ok=false;
+  }
+  if(!document.getElementById('f_nombre').value.trim()){
+    document.getElementById('err_nombre').style.display='block';
+    document.getElementById('f_nombre').classList.add('has-error');ok=false;
+  }
+  const rolVal=document.getElementById('f_rol').value;
+  if(rolVal&&!/^\d{1,5}-\d{1,5}$/.test(rolVal)){
+    document.getElementById('err_rol').style.display='block';
+    document.getElementById('f_rol').classList.add('has-error');ok=false;
+  }
+  if(!ok){document.querySelector('.has-error').scrollIntoView({behavior:'smooth',block:'center'});return}
+  const campo={
+    id:editId||genId(),
+    fechaIngreso:document.getElementById('f_fecha').value,
+    ejecutivo:document.getElementById('f_ejecutivo').value,
+    nombreDueno:document.getElementById('f_dueno').value.trim(),
+    rutDueno:document.getElementById('f_rut').value.trim(),
+    nombreEncargado:document.getElementById('f_encargado').value.trim(),
+    telefonoEncargado:document.getElementById('f_telefono').value.trim(),
+    region:document.getElementById('f_region').value,
+    comuna:document.getElementById('f_comuna').value,
+    rol:document.getElementById('f_rol').value,
+    nombreCampo:document.getElementById('f_nombre').value.trim(),
+    superficie:document.getElementById('f_superficie').value,
+    ddaa:document.getElementById('f_ddaa').value,
+    plantaciones:plantacionesVal,
+    frutales:plantacionesVal==='SI'?JSON.parse(JSON.stringify(frutales)):[],
+    ubicacionGmaps:document.getElementById('f_gmaps').value.trim(),
+  };
+  if(editId){const idx=campos.findIndex(c=>c.id===editId);if(idx>=0)campos[idx]=campo;showToast('Campo actualizado ✓')}
+  else{campos.unshift(campo);showToast('Campo registrado ✓')}
+  save();cerrarFormulario();renderDashboard();
+}
+function editarCampo(id){const c=campos.find(x=>x.id===id);if(c)abrirFormulario(c)}
+function eliminarCampo(id){
+  if(!confirm('¿Eliminar este campo?'))return;
+  campos=campos.filter(c=>c.id!==id);save();
+  showToast('Eliminado','error');renderDashboard();
+}
+
+// Resize handler
+window.addEventListener('resize',()=>{
+  const fab=document.getElementById('fabBtn');
+  if(fab)fab.style.display=isMobile()?'flex':'none';
+});
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+renderDashboard();
+</script>
+</body>
+</html>
